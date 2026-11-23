@@ -1,0 +1,34 @@
+---
+/** Retrato 3x4 de jornal antigo: iniciais sobre retícula. Sem arte oficial do jogo. */
+import { iniciais } from '../lib/util';
+interface Props { heroi: string; tamanho?: number }
+const { heroi, tamanho = 64 } = Astro.props;
+---
+<span class="retrato" style={`--t:${tamanho}px`} aria-hidden="true">
+  <span class="foto reticula"><span>{iniciais(heroi)}</span></span>
+</span>
+
+<style>
+  .retrato {
+    flex: none;
+    display: inline-block;
+    inline-size: var(--t);
+    padding: 3px;
+    border: 1px solid var(--tinta);
+    background: var(--papel);
+    box-shadow: 2px 2px 0 var(--tinta);
+  }
+  .foto {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 4;
+    background-color: var(--papel-3);
+    background-size: 4px 4px;
+    overflow: hidden;
+  }
+  .foto span {
+    font: 400 calc(var(--t) * 0.5) / 1 var(--f-manchete);
+    color: var(--tinta);
+    letter-spacing: -0.02em;
+  }
+</style>

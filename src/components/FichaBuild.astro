@@ -1,0 +1,76 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Carimbo from './Carimbo.astro';
+import Retrato from './Retrato.astro';
+import { url, fmtData, slugHeroi } from '../lib/util';
+interface Props { build: CollectionEntry<'builds'> }
+const { build } = Astro.props;
+const b = build.data;
+const late = b.fases.at(-1)?.itens ?? [];
+---
+<article class="ficha" data-heroi={slugHeroi(b.heroi)} data-status={b.status} data-estilo={b.estilo}>
+  <header class="dado">
+    <span>Ficha · {b.papel} · {b.estilo}</span>
+    <span>{fmtData(b.auditadaEm)}</span>
+  </header>
+  <div class="topo">
+    <Retrato heroi={b.heroi} tamanho={58} />
+    <div class="nome">
+      <p class="heroi">{b.heroi}</p>
+      <h3><a href={url(`/builds/${build.id}/`)}>{b.titulo}</a></h3>
+    </div>
+    <Carimbo status={b.status} class="selo" />
+  </div>
+  <p class="veredito">{b.veredito}</p>
+  <p class="rubrica">Fecha o jogo com</p>
+  <ul class="itens">
+    {late.map((i) => <li class={`item item--${i.tipo}`}>{i.nome}</li>)}
+  </ul>
+  <footer class="dado">
+    <span>Patch: {b.patch}</span>
+    {b.exemplo && <span class="tag-exemplo">Exemplo</span>}
+  </footer>
+</article>
+
+<style>
+  .ficha {
+    display: flex;
+    flex-direction: column;
+    background: var(--papel-2);
+    border: 1px solid var(--tinta);
+    padding: 0 1.1rem 0.9rem;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-inline: -1.1rem;
+    padding: 0.35rem 1.1rem;
+    border-block-end: 1px solid var(--tinta);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+  }
+  .topo { display: flex; gap: 0.9rem; align-items: center; margin-block: 1rem 0.75rem; }
+  .nome { flex: 1; min-inline-size: 0; }
+  .heroi { margin: 0; font: 400 1.7rem/1 var(--f-manchete); text-transform: uppercase; }
+  h3 { margin-block-start: 0.2rem; font: italic 400 1.05rem/1.25 var(--f-texto); }
+  h3 a { text-decoration: none; }
+  h3 a::after { content: ''; position: absolute; inset: 0; }
+  .ficha { position: relative; }
+  .ficha:hover h3 a { text-decoration: underline; color: var(--sangue); }
+  .ficha :global(.selo) { align-self: start; rotate: 6deg; margin-block-start: 0.2rem; }
+  .veredito { margin: 0 0 0.9rem; font-size: 0.95rem; line-height: 1.45; color: var(--tinta-2); flex: 1; }
+  .itens { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0; padding: 0; list-style: none; }
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 0.9rem;
+    padding-block-start: 0.5rem;
+    border-block-start: 1px dotted var(--fio);
+    font-size: 0.74rem;
+    color: var(--tinta-3);
+  }
+</style>

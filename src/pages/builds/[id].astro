@@ -1,0 +1,143 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Carimbo from '../../components/Carimbo.astro';
+import Retrato from '../../components/Retrato.astro';
+import { url, fmtData, STATUS, TIPO_ITEM, slugHeroi } from '../../lib/util';
+
+export async function getStaticPaths() {
+  const builds = await getCollection('builds');
+  return builds.map((build) => ({ params: { id: build.id }, props: { build } }));
+}
+
+interface Props { build: CollectionEntry<'builds'> }
+const { build } = Astro.props;
+const b = build.data;
+const { Content } = await render(build);
+const dificuldade = ['Fácil', 'Média', 'Difícil'][b.dificuldade - 1];
+---
+<Base titulo={`${b.heroi}: ${b.titulo}`} descricao={b.veredito}>
+  <a class="voltar dado" href={url('/builds/')}>← Todas as fichas</a>
+
+  <article class="documento">
+    <header>
+      <Retrato heroi={b.heroi} tamanho={104} />
+      <div class="nome">
+        <p class="rubrica"><a href={url(`/builds/?heroi=${slugHeroi(b.heroi)}`)}>Mais builds de {b.heroi}</a> · {b.papel} · {b.estilo}</p>
+        <h1>{b.heroi}</h1>
+        <p class="titulo">{b.titulo}</p>
+        {b.exemplo && <span class="tag-exemplo">Exemplo</span>}
+      </div>
+      <Carimbo status={b.status} data={b.auditadaEm} class="selo-grande" />
+    </header>
+
+    <section class={`parecer parecer--${b.status}`} aria-labelledby="t-parecer">
+      <h2 id="t-parecer" class="rubrica">Parecer do auditor</h2>
+      <p>{b.veredito}</p>
+      <p class="situacao dado">{STATUS[b.status].descricao}.</p>
+    </section>
+
+    <dl class="campos">
+      <div><dt>Patch testado</dt><dd>{b.patch}</dd></div>
+      <div><dt>Auditada em</dt><dd>{fmtData(b.auditadaEm)}</dd></div>
+      <div><dt>Autor</dt><dd>{b.autor}</dd></div>
+      <div><dt>Auditor</dt><dd>{b.auditor}</dd></div>
+      <div><dt>Dificuldade</dt><dd>{dificuldade}</dd></div>
+      {b.codigoBuild && <div><dt>Código no jogo</dt><dd class="dado">{b.codigoBuild}</dd></div>}
+    </dl>
+
+    <div class="corpo">
+      <section aria-labelledby="t-itens">
+        <h2 id="t-itens" class="sub">Itens, na ordem</h2>
+        <ol class="fases">
+          {b.fases.map((f, i) => (
+            <li>
+              <h3><span class="dado">{String(i + 1).padStart(2, '0')}</span> {f.nome}</h3>
+              <ul>
+                {f.itens.map((it) => (
+                  <li>
+                    <span class={`item item--${it.tipo}`} title={TIPO_ITEM[it.tipo]}>{it.nome}</span>
+                    {it.nota && <span class="nota">{it.nota}</span>}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+        <p class="legenda">
+          {Object.entries(TIPO_ITEM).map(([k, v]) => <span class={`item item--${k}`}>{v}</span>)}
+        </p>
+      </section>
+
+      <aside aria-labelledby="t-skills">
+        <h2 id="t-skills" class="sub">Prioridade de habilidades</h2>
+        <ol class="skills">
+          {b.prioridade.map((s, i) => <li><span class="dado">{i + 1}º</span>{s}</li>)}
+        </ol>
+      </aside>
+    </div>
+
+    <section class="plano prosa" aria-labelledby="t-plano">
+      <h2 id="t-plano" class="sub">Plano de jogo</h2>
+      <Content />
+    </section>
+  </article>
+</Base>
+
+<style>
+  .voltar { display: inline-block; margin-block: 0.75rem; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; }
+  .documento { border: 1px solid var(--tinta); background: var(--papel-2); padding: clamp(1rem, 3vw, 2rem); }
+  header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: center;
+    padding-block-end: 1.25rem;
+    border-block-end: 3px double var(--tinta);
+  }
+  .nome .rubrica a { text-decoration: none; }
+  h1 { font: 400 clamp(3rem, 9vw, 5.5rem) / 0.9 var(--f-manchete); text-transform: uppercase; }
+  .titulo { margin: 0.3rem 0 0.5rem; font: italic 400 1.4rem/1.2 var(--f-texto); }
+  header :global(.selo-grande) { font-size: 1.15rem; rotate: 7deg; }
+  @media (max-width: 640px) {
+    header { grid-template-columns: auto minmax(0, 1fr); }
+    header :global(.selo-grande) { grid-column: 1 / -1; justify-self: start; }
+  }
+
+  .parecer { margin-block-start: 1.5rem; padding: 1rem 1.2rem; border-inline-start: 5px solid var(--cor); background: var(--papel); }
+  .parecer--valida { --cor: var(--verde); }
+  .parecer--revisar { --cor: var(--ambar); }
+  .parecer--desatualizada { --cor: var(--sangue); }
+  .parecer p { margin: 0; font-size: 1.15rem; }
+  .parecer .situacao { margin-block-start: 0.6rem; font-size: 0.82rem; color: var(--cor); }
+
+  .campos {
+    margin: 1.25rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    gap: 0 2rem;
+  }
+  .campos div { display: flex; flex-direction: column; padding-block: 0.45rem; border-block-end: 1px dotted var(--fio); }
+  .campos dt { font: 700 0.7rem var(--f-dado); text-transform: uppercase; color: var(--tinta-3); }
+  .campos dd { margin: 0.1rem 0 0; }
+
+  .corpo { margin-block-start: 2rem; display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 2.5rem; }
+  @media (max-width: 820px) { .corpo { grid-template-columns: 1fr; } }
+  .sub { font: 400 1.5rem/1 var(--f-manchete); text-transform: uppercase; margin-block-end: 1rem; padding-block-end: 0.35rem; border-block-end: 2px solid var(--tinta); }
+
+  .fases { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.25rem; }
+  .fases h3 { margin-block-end: 0.5rem; font: 600 1rem var(--f-texto); }
+  .fases h3 .dado { color: var(--sangue); font-weight: 700; margin-inline-end: 0.3rem; }
+  .fases ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+  .fases ul li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.6rem; }
+  .fases .item { font-size: 0.9rem; }
+  .nota { font-size: 0.88rem; font-style: italic; color: var(--tinta-2); }
+  .legenda { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.25rem 0 0; }
+  .legenda .item { font-size: 0.75rem; }
+
+  .skills { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+  .skills li { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--tinta); background: var(--papel); font-weight: 600; }
+  .skills .dado { color: var(--sangue); font-weight: 700; }
+
+  .plano { margin-block-start: 2.5rem; }
+</style>

@@ -1,0 +1,9 @@
+---
+import { STATUS, fmtData, type StatusBuild } from '../lib/util';
+interface Props { status: StatusBuild; data?: Date; class?: string }
+const { status, data, class: extra } = Astro.props;
+---
+<span class:list={['carimbo', `carimbo--${status}`, extra]} title={STATUS[status].descricao}>
+  {STATUS[status].rotulo}
+  {data && <small>{fmtData(data)}</small>}
+</span>

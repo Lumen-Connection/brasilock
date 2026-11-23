@@ -1,0 +1,68 @@
+---
+import Base from '../layouts/Base.astro';
+import Carimbo from '../components/Carimbo.astro';
+import Sigilo from '../components/Sigilo.astro';
+import { STATUS, type StatusBuild } from '../lib/util';
+
+const artigos = [
+  'Toda build chega à mesa com o patch em que foi feita. Build teórica, de planilha, não ganha carimbo.',
+  'A build é jogada em partidas reais no patch em vigor antes de ser auditada.',
+  'Quem audita nunca é quem escreveu. O auditor confere se os itens existem, se a ordem faz sentido e se o plano de jogo bate com a prática.',
+  'Toda ficha traz plano de jogo escrito: a ideia central e os erros mais comuns. Lista de item sozinha não basta.',
+  'Saiu patch que mexe no herói, nos itens da build ou na economia: a ficha volta para EM REVISÃO até ser testada de novo.',
+  'Build que não tem mais conserto recebe VENCIDA e fica no arquivo, para a história.',
+];
+---
+<Base titulo="Regulamento" descricao="Os critérios que uma build de Deadlock precisa cumprir para ganhar o carimbo do Brasilock.">
+  <header class="abre">
+    <p class="rubrica">Cartório Brasilock</p>
+    <h1>Regulamento do carimbo</h1>
+    <p class="linha-fina">Build de Deadlock envelhece rápido. O carimbo existe para você saber, antes do primeiro item, se aquilo ainda funciona.</p>
+  </header>
+
+  <div class="ornamento"><Sigilo tamanho={26} /></div>
+
+  <section aria-labelledby="t-art">
+    <h2 id="t-art" class="sub">Dos artigos</h2>
+    <ol class="artigos">
+      {artigos.map((a, i) => <li><span class="art dado">Art. {i + 1}º</span><p>{a}</p></li>)}
+    </ol>
+  </section>
+
+  <section class="secao" aria-labelledby="t-car">
+    <h2 id="t-car" class="sub">Dos carimbos</h2>
+    <dl class="carimbos">
+      {(Object.keys(STATUS) as StatusBuild[]).map((k) => (
+        <div><dt><Carimbo status={k} /></dt><dd>{STATUS[k].descricao}.</dd></div>
+      ))}
+      <div><dt><span class="tag-exemplo">Exemplo</span></dt><dd>Ficha que só mostra o formato do site. Vai ser trocada por uma build auditada de verdade.</dd></div>
+    </dl>
+  </section>
+
+  <section class="secao" aria-labelledby="t-env">
+    <div class="quadro">
+      <h2 id="t-env">Mande sua build</h2>
+      <p>Tem uma build que funciona? Mande o código da build no jogo, o patch em que você jogou e o plano em poucas linhas. Ela entra na fila da mesa e ganha carimbo quando alguém de fora conferir.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .abre { padding-block: 1.25rem 0; max-inline-size: 70ch; }
+  h1 { font: 400 clamp(2.8rem, 9vw, 5.5rem) / 0.95 var(--f-manchete); text-transform: uppercase; }
+  .linha-fina { margin: 0.75rem 0 0; font-size: 1.15rem; font-style: italic; color: var(--tinta-2); }
+  .ornamento :global(.sigilo) { color: var(--ambar); }
+  .sub { font: 700 2rem/1 var(--f-titulo); margin-block-end: 0.75rem; }
+  .artigos { margin: 0; padding: 0; list-style: none; max-inline-size: 72ch; }
+  .artigos li { display: grid; grid-template-columns: 4.8rem 1fr; gap: 1rem; padding-block: 0.7rem; border-block-end: 1px dotted var(--fio); }
+  .art { font-size: 0.85rem; font-weight: 700; line-height: 1.9; color: var(--sangue); }
+  .artigos p { margin: 0; font-size: 1.05rem; }
+  .carimbos { margin: 0; display: grid; gap: 1.1rem; max-inline-size: 64ch; }
+  .carimbos div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; align-items: center; }
+  .carimbos dt { justify-self: start; }
+  .carimbos dd { margin: 0; color: var(--tinta-2); }
+  @media (max-width: 480px) { .carimbos div { grid-template-columns: 1fr; gap: 0.4rem; } }
+  .quadro { border: 2px solid var(--tinta); outline: 1px solid var(--tinta); outline-offset: 3px; padding: 1.25rem 1.4rem; margin: 4px; background: var(--papel-2); max-inline-size: 70ch; }
+  .quadro h2 { font: 400 2rem/1 var(--f-manchete); text-transform: uppercase; }
+  .quadro p { margin: 0.6rem 0 0; }
+</style>

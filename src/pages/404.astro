@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import Sigilo from '../components/Sigilo.astro';
+import { url } from '../lib/util';
+---
+<Base titulo="Página não encontrada">
+  <div class="nada">
+    <Sigilo tamanho={56} />
+    <h1>Essa rua não existe na Cidade.</h1>
+    <p>Talvez o patch tenha mudado o mapa de novo. <a href={url('/')}>Voltar para a capa</a></p>
+  </div>
+</Base>
+
+<style>
+  .nada { padding-block: 4rem; text-align: center; }
+  .nada :global(.sigilo) { color: var(--ambar); }
+  h1 { font: 400 clamp(2.4rem, 8vw, 4.5rem) / 1 var(--f-manchete); text-transform: uppercase; margin: 1.25rem 0 0.75rem; }
+</style>

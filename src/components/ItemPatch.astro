@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url, fmtData, TIPO_PATCH } from '../lib/util';
+interface Props { patch: CollectionEntry<'patches'> }
+const { patch } = Astro.props;
+const p = patch.data;
+---
+<li class={`patch patch--${p.tipo}`}>
+  <time class="dado" datetime={p.data.toISOString()}>{fmtData(p.data)}</time>
+  <div>
+    <span class:list={['etiqueta', { 'etiqueta--sangue': p.tipo === 'major', 'etiqueta--safira': p.tipo === 'ranked' }]}>
+      {TIPO_PATCH[p.tipo]}
+    </span>
+    <h3><a href={url(`/patches/${patch.id}/`)}>{p.titulo}</a></h3>
+    <p>{p.resumo}</p>
+  </div>
+</li>
+
+<style>
+  .patch {
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 1rem;
+    border-block-end: 1px solid var(--fio);
+  }
+  time { font-size: 0.85rem; color: var(--tinta-3); padding-block-start: 0.15rem; text-transform: uppercase; }
+  h3 { margin-block: 0.4rem 0.3rem; font: 400 1.6rem/1 var(--f-manchete); text-transform: uppercase; }
+  h3 a { text-decoration: none; }
+  h3 a:hover { color: var(--sangue); }
+  p { margin: 0; color: var(--tinta-2); font-size: 0.98rem; max-inline-size: 70ch; }
+  @media (max-width: 560px) { .patch { grid-template-columns: 1fr; gap: 0.3rem; } }
+</style>

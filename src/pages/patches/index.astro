@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ItemPatch from '../../components/ItemPatch.astro';
+
+const patches = (await getCollection('patches')).sort((a, b) => +b.data.data - +a.data.data);
+---
+<Base titulo="Arquivo de patches" descricao="Cada update do Deadlock resumido em português: o que mudou e o que isso faz com as builds.">
+  <header class="abre">
+    <p class="rubrica">{patches.length} updates no arquivo</p>
+    <h1>Arquivo de patches</h1>
+    <p class="linha-fina">O que a Valve mudou, em português, e o que isso faz com as suas builds.</p>
+  </header>
+  <ol class="lista">{patches.map((p) => <ItemPatch patch={p} />)}</ol>
+</Base>
+
+<style>
+  .abre { padding-block: 1.25rem 1.5rem; max-inline-size: 70ch; }
+  h1 { font: 400 clamp(3rem, 10vw, 6rem) / 0.95 var(--f-manchete); text-transform: uppercase; }
+  .linha-fina { margin: 0.75rem 0 0; font-size: 1.15rem; }
+  .lista { margin: 0; padding: 0; list-style: none; border-block-start: 5px solid var(--tinta); }
+</style>

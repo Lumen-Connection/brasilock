@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FichaBuild from '../../components/FichaBuild.astro';
+import { url, STATUS, slugHeroi, type StatusBuild } from '../../lib/util';
+
+const builds = (await getCollection('builds')).sort((a, b) => +b.data.auditadaEm - +a.data.auditadaEm);
+const herois = [...new Set(builds.map((b) => b.data.heroi))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+const estilos = ['Arma', 'Espírito', 'Híbrido'];
+---
+<Base titulo="Builds auditadas" descricao="Builds de Deadlock testadas em partida real e conferidas por outra pessoa, com o patch em que foram validadas.">
+  <header class="abre">
+    <p class="rubrica">Cartório Brasilock · {builds.length} fichas no arquivo</p>
+    <h1>Builds auditadas</h1>
+    <p class="linha-fina">
+      Cada ficha diz em qual patch a build foi testada e quem conferiu. Sem carimbo verde, leia o motivo antes de comprar o primeiro item.
+    </p>
+  </header>
+
+  <form class="filtros" aria-label="Filtrar builds" onsubmit="return false">
+    <label class="campo">
+      <span class="rubrica">Herói</span>
+      <select name="heroi">
+        <option value="">Todos</option>
+        {herois.map((h) => <option value={slugHeroi(h)}>{h}</option>)}
+      </select>
+    </label>
+    <label class="campo">
+      <span class="rubrica">Estilo</span>
+      <select name="estilo">
+        <option value="">Todos</option>
+        {estilos.map((e) => <option value={e}>{e}</option>)}
+      </select>
+    </label>
+    <fieldset>
+      <legend class="rubrica">Carimbo</legend>
+      {(Object.keys(STATUS) as StatusBuild[]).map((k) => (
+        <label><input type="checkbox" name="status" value={k} checked={k !== 'desatualizada'} /> {STATUS[k].rotulo}</label>
+      ))}
+    </fieldset>
+    <p class="contagem dado" aria-live="polite" data-contagem></p>
+  </form>
+
+  <div class="fichas" data-lista>
+    {builds.map((b) => <FichaBuild build={b} />)}
+  </div>
+  <p class="vazio" data-vazio hidden>Nenhuma ficha com esses filtros. Ainda.</p>
+
+  <p class="como">Quer mandar sua build pra auditoria? Veja o <a href={url('/regulamento/')}>regulamento</a>.</p>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.filtros')!;
+  const fichas = [...document.querySelectorAll<HTMLElement>('[data-lista] > .ficha')];
+  const contagem = document.querySelector('[data-contagem]')!;
+  const vazio = document.querySelector<HTMLElement>('[data-vazio]')!;
+  const aplicar = () => {
+    const fd = new FormData(form);
+    const heroi = fd.get('heroi');
+    const estilo = fd.get('estilo');
+    const status = new Set(fd.getAll('status'));
+    let n = 0;
+    for (const f of fichas) {
+      const ok =
+        (!heroi || f.dataset.heroi === heroi) &&
+        (!estilo || f.dataset.estilo === estilo) &&
+        status.has(f.dataset.status!);
+      f.hidden = !ok;
+      if (ok) n++;
+    }
+    contagem.textContent = `${n} de ${fichas.length} fichas`;
+    vazio.hidden = n > 0;
+  };
+  const h = new URLSearchParams(location.search).get('heroi');
+  if (h) (form.elements.namedItem('heroi') as HTMLSelectElement).value = h;
+  form.addEventListener('change', aplicar);
+  aplicar();
+</script>
+
+<style>
+  .abre { padding-block: 1.25rem 0; max-inline-size: 70ch; }
+  h1 { font: 400 clamp(3rem, 10vw, 6rem) / 0.95 var(--f-manchete); text-transform: uppercase; }
+  .linha-fina { margin: 0.75rem 0 0; font-size: 1.15rem; line-height: 1.45; }
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: end;
+    margin-block: 1.75rem 1.25rem;
+    padding-block: 1rem;
+    border-block: 1px solid var(--tinta);
+  }
+  .campo { display: grid; gap: 0.2rem; }
+  .campo .rubrica { margin: 0; }
+  select {
+    min-inline-size: 10rem;
+    padding: 0.4rem 0.5rem;
+    background: var(--papel-2);
+    color: var(--tinta);
+    border: 1px solid var(--tinta);
+    border-radius: 0;
+    font: 400 0.95rem var(--f-dado);
+  }
+  fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; }
+  legend { padding: 0; }
+  fieldset label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.95rem; cursor: pointer; }
+  input { accent-color: var(--sangue); }
+  .contagem { margin: 0 0 0 auto; font-size: 0.8rem; color: var(--tinta-3); }
+  .fichas { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+  .vazio { font-style: italic; color: var(--tinta-3); }
+  .como { margin-block-start: 2rem; font-size: 0.95rem; color: var(--tinta-2); }
+</style>

@@ -1,0 +1,14 @@
+{
+  "pergunta": "Como tá o Deadlock agora?",
+  "veredito": "A poeira baixou.",
+  "linhaFina": "Quase dois meses desde City Never Sleeps. Os heróis novos já chegaram, o último patch apertou Baba, Deadman Danny e Celeste, e a temporada 2 do ranqueado começou.",
+  "humor": "estavel",
+  "atualizadoEm": "2026-11-23T15:00:00-03:00",
+  "edicao": 1,
+  "ultimoMajor": {
+    "nome": "City Never Sleeps",
+    "data": "2026-09-29T20:25:00Z",
+    "patch": "2026-09-29-city-never-sleeps"
+  },
+  "patchAtual": "Minor Update 04/11"
+}

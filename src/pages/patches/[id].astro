@@ -1,0 +1,81 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Retrato from '../../components/Retrato.astro';
+import { url, fmtData, TIPO_PATCH } from '../../lib/util';
+
+export async function getStaticPaths() {
+  const patches = await getCollection('patches');
+  return patches.map((patch) => ({ params: { id: patch.id }, props: { patch } }));
+}
+
+interface Props { patch: CollectionEntry<'patches'> }
+const { patch } = Astro.props;
+const p = patch.data;
+const { Content } = await render(patch);
+---
+<Base titulo={p.titulo} descricao={p.resumo}>
+  <a class="voltar dado" href={url('/patches/')}>← Arquivo de patches</a>
+  <article>
+    <header>
+      <p class="meta">
+        <span class:list={['etiqueta', { 'etiqueta--sangue': p.tipo === 'major', 'etiqueta--safira': p.tipo === 'ranked' }]}>{TIPO_PATCH[p.tipo]}</span>
+        <time class="dado" datetime={p.data.toISOString()}>{fmtData(p.data)}</time>
+      </p>
+      <h1>{p.titulo}</h1>
+      <p class="linha-fina">{p.resumo}</p>
+    </header>
+
+    {(p.sobe.length > 0 || p.desce.length > 0) && (
+      <div class="sd">
+        {p.sobe.length > 0 && (
+          <div class="lado lado--sobe"><h2>▲ Sobe</h2><ul>{p.sobe.map((h) => <li><Retrato heroi={h} tamanho={30} />{h}</li>)}</ul></div>
+        )}
+        {p.desce.length > 0 && (
+          <div class="lado lado--desce"><h2>▼ Desce</h2><ul>{p.desce.map((h) => <li><Retrato heroi={h} tamanho={30} />{h}</li>)}</ul></div>
+        )}
+      </div>
+    )}
+
+    {p.destaques.length > 0 && (
+      <section aria-labelledby="t-dest">
+        <h2 id="t-dest" class="sub">O que mudou</h2>
+        <ul class="destaques">{p.destaques.map((d) => <li>{d}</li>)}</ul>
+      </section>
+    )}
+
+    <div class="prosa corpo"><Content /></div>
+
+    {p.fontes.length > 0 && (
+      <footer>
+        <h2 class="rubrica">Fontes</h2>
+        <ul>{p.fontes.map((f) => <li><a href={f.url} rel="noopener">{f.nome}</a></li>)}</ul>
+      </footer>
+    )}
+  </article>
+</Base>
+
+<style>
+  .voltar { display: inline-block; margin-block: 0.75rem; font-size: 0.8rem; text-transform: uppercase; text-decoration: none; }
+  article { max-inline-size: 800px; }
+  header { padding-block-end: 1.25rem; margin-block-end: 1.5rem; border-block-end: 3px double var(--tinta); }
+  .meta { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.75rem; }
+  time { font-size: 0.82rem; color: var(--tinta-3); text-transform: uppercase; }
+  h1 { font: 400 clamp(2.6rem, 9vw, 5rem) / 0.95 var(--f-manchete); text-transform: uppercase; }
+  .linha-fina { margin: 0.8rem 0 0; font-size: 1.25rem; line-height: 1.4; font-style: italic; color: var(--tinta-2); }
+
+  .sd { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem 2rem; margin-block-end: 2rem; }
+  .lado h2 { font: 700 0.9rem var(--f-dado); text-transform: uppercase; padding-block-end: 0.3rem; border-block-end: 2px solid currentColor; }
+  .lado--sobe h2 { color: var(--ambar); }
+  .lado--desce h2 { color: var(--safira); }
+  .lado ul { margin: 0.6rem 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; }
+  .lado li { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+
+  .sub { font: 400 1.6rem/1 var(--f-manchete); text-transform: uppercase; margin-block-end: 0.75rem; }
+  .destaques { margin: 0; padding: 0; list-style: none; }
+  .destaques li { position: relative; padding: 0.6rem 0 0.6rem 1.4rem; border-block-end: 1px dotted var(--fio); line-height: 1.5; }
+  .destaques li::before { content: ''; position: absolute; inset-inline-start: 0.2rem; inset-block-start: 1.1rem; inline-size: 0.45rem; block-size: 0.45rem; background: var(--sangue); rotate: 45deg; }
+  .corpo { margin-block-start: 1.5rem; font-size: 1.05rem; }
+  footer { margin-block-start: 2rem; padding-block-start: 0.75rem; border-block-start: 1px solid var(--tinta); }
+  footer ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+</style>

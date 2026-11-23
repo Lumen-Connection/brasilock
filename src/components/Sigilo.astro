@@ -1,0 +1,12 @@
+---
+/** Olho ocultista desenhado à mão, usado como vinheta. Não é logo do jogo. */
+interface Props { tamanho?: number }
+const { tamanho = 22 } = Astro.props;
+---
+<svg class="sigilo" viewBox="0 0 48 48" width={tamanho} height={tamanho} aria-hidden="true">
+  <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="1.5" />
+  <circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="1.5 2.5" />
+  <path d="M9 24c4.5-7 9.5-10 15-10s10.5 3 15 10c-4.5 7-9.5 10-15 10S13.5 31 9 24Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+  <circle cx="24" cy="24" r="5" fill="currentColor" />
+  <path d="M24 3v5M24 40v5M3 24h4M41 24h4" stroke="currentColor" stroke-width="1.5" />
+</svg>
